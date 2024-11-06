@@ -11,6 +11,7 @@ export default function Login() {
     type: 'success' | 'error' | null;
     message: string;
   }>({ type: null, message: '' });
+  
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
