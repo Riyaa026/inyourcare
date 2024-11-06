@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StarIcon } from '@heroicons/react/24/solid';
+import { StarIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/solid';
 
 interface Profile {
   id: string;
@@ -20,6 +20,7 @@ interface Profile {
 
 export default function HospitalProfile() {
   const [activeTab, setActiveTab] = useState<'hospitals' | 'organizations'>('hospitals');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   // Example data - replace with actual data from backend
   const profiles: Profile[] = [
@@ -36,7 +37,7 @@ export default function HospitalProfile() {
         daily: 5000,
         monthly: 100000
       },
-      description: 'Leading healthcare provider with specialized elderly care units',
+      description: 'Leading healthcare provider with specialized elderly care units. We offer comprehensive medical care with experienced staff and modern facilities.',
       services: ['24/7 Nursing', 'Physiotherapy', 'Emergency Care']
     },
     {
@@ -52,7 +53,7 @@ export default function HospitalProfile() {
         daily: 3000,
         monthly: 80000
       },
-      description: 'Professional caregiving services for elderly',
+      description: 'Professional caregiving services for elderly with a focus on personalized care and comfort. Our team ensures the highest quality of home-based healthcare.',
       services: ['Home Care', 'Assisted Living', 'Medical Assistance']
     }
   ];
@@ -73,6 +74,10 @@ export default function HospitalProfile() {
         <span className="ml-2 text-gray-600">{rating}/5</span>
       </div>
     );
+  };
+
+  const toggleExpand = (id: string) => {
+    setExpandedId(expandedId === id ? null : id);
   };
 
   return (
@@ -100,7 +105,7 @@ export default function HospitalProfile() {
         </button>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="space-y-4">
         {profiles
           .filter((profile) => 
             activeTab === 'hospitals' 
@@ -108,48 +113,70 @@ export default function HospitalProfile() {
               : profile.type === 'organization'
           )
           .map((profile) => (
-            <div key={profile.id} className="card">
-              <div className="flex justify-between items-start mb-4">
-                <div>
+            <div 
+              key={profile.id} 
+              className="card cursor-pointer transition-all duration-300 ease-in-out"
+              onClick={() => toggleExpand(profile.id)}
+            >
+              <div className="flex justify-between items-start">
+                <div className="space-y-2">
                   <h3 className="text-xl font-semibold">{profile.name}</h3>
                   <p className="text-gray-600">{profile.location}</p>
+                  {renderRating(profile.rating)}
                 </div>
-                {renderRating(profile.rating)}
+                <button className="text-gray-500">
+                  {expandedId === profile.id ? (
+                    <ChevronUpIcon className="h-6 w-6" />
+                  ) : (
+                    <ChevronDownIcon className="h-6 w-6" />
+                  )}
+                </button>
               </div>
 
-              <div className="space-y-3 mb-4">
-                <p className="text-gray-600">
-                  <span className="font-semibold">Contact:</span> {profile.contact}
-                </p>
-                <p className="text-gray-600">
-                  <span className="font-semibold">Email:</span> {profile.email}
-                </p>
-                <div className="text-gray-600">
-                  <span className="font-semibold">Pricing:</span>
-                  <ul className="ml-4">
-                    <li>Hourly: ₹{profile.pricing.hourly}</li>
-                    <li>Daily: ₹{profile.pricing.daily}</li>
-                    <li>Monthly: ₹{profile.pricing.monthly}</li>
-                  </ul>
+              {expandedId === profile.id && (
+                <div className="mt-6 pt-4 border-t space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="font-semibold text-gray-700 mb-2">Contact Information</h4>
+                      <p className="text-gray-600">{profile.contact}</p>
+                      <p className="text-gray-600">{profile.email}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-700 mb-2">Pricing Details</h4>
+                      <ul className="text-gray-600 space-y-1">
+                        <li>Hourly Rate: ₹{profile.pricing.hourly}</li>
+                        <li>Daily Rate: ₹{profile.pricing.daily}</li>
+                        <li>Monthly Rate: ₹{profile.pricing.monthly}</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-700 mb-2">Description</h4>
+                    <p className="text-gray-600">{profile.description}</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-700 mb-2">Services</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {profile.services.map((service, index) => (
+                        <span
+                          key={index}
+                          className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+                        >
+                          {service}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-4">
+                    <button className="btn-primary">
+                      Book Now
+                    </button>
+                  </div>
                 </div>
-              </div>
-
-              <p className="text-gray-700 mb-4">{profile.description}</p>
-
-              <div className="flex flex-wrap gap-2">
-                {profile.services.map((service, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
-                  >
-                    {service}
-                  </span>
-                ))}
-              </div>
-
-              <div className="mt-4 pt-4 border-t flex justify-end">
-                <button className="btn-primary">Book Now</button>
-              </div>
+              )}
             </div>
           ))}
       </div>

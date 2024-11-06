@@ -20,8 +20,8 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/explore" element={<Explore />} />
-            <Route path="/hospitals" element={<HospitalList />} />
-            <Route path="/hospital/:id" element={<HospitalProfile />} />
+            <Route path="/hospitals" element={<HospitalProfile />} />
+            <Route path="/hospital/:id" element={<HospitalList />} />
             <Route path="/booking/:id" element={<Booking />} />
             <Route path="/bookings" element={<BookingHistory />} />
           </Routes>
