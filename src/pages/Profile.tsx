@@ -14,7 +14,7 @@ export default function Profile() {
   const [showNewProfileForm, setShowNewProfileForm] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<PatientProfile | null>(null);
   const [isViewMode, setIsViewMode] = useState(false);
-  
+
   // Example profiles (replace with actual data from backend)
   const [profiles, setProfiles] = useState<PatientProfile[]>([
     {
@@ -28,32 +28,65 @@ export default function Profile() {
     }
   ]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const profileData = {
       id: selectedProfile?.id || Date.now().toString(),
-      fullName: formData.get('fullName') as string,
+      name: formData.get('fullName') as string,
       age: parseInt(formData.get('age') as string),
       gender: formData.get('gender') as string,
-      contactNumber: formData.get('contactNumber') as string,
+      emergencyContactNumber: formData.get('contactNumber') as string,
       preferredLanguage: formData.get('preferredLanguage') as string,
-      medicalCondition: formData.get('medicalCondition') as string
+      medicalCondition: formData.get('medicalCondition') as string,
+      userId: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '{}').id : null
     };
 
-    if (selectedProfile) {
-      // Update existing profile
-      setProfiles(profiles.map(profile => 
-        profile.id === selectedProfile.id ? profileData : profile
-      ));
-    } else {
-      // Create new profile
-      setProfiles([...profiles, profileData]);
+    try {
+      // Check if updating an existing profile or creating a new one
+      if (selectedProfile) {
+        // Update existing profile
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/patients/update`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(profileData),
+        });
+
+        if (response.ok) {
+          const updatedProfile = await response.json();
+          setProfiles(profiles.map(profile => 
+            profile.id === selectedProfile.id ? updatedProfile : profile
+          ));
+        } else {
+          console.error('Error updating profile');
+        }
+      } else {
+        // Create new profile
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/patients/create`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(profileData),
+        });
+
+        if (response.ok) {
+          const newProfile = await response.json();
+          setProfiles([...profiles, newProfile]);
+        } else {
+          console.error('Error creating profile');
+        }
+      }
+
+      // Close the form after successful submission
+      setShowNewProfileForm(false);
+      setSelectedProfile(null);
+      setIsViewMode(false);
+    } catch (error) {
+      console.error('Error:', error);
     }
-    
-    setShowNewProfileForm(false);
-    setSelectedProfile(null);
-    setIsViewMode(false);
   };
 
   const languages = [
@@ -92,13 +125,13 @@ export default function Profile() {
       {/* Profile List */}
       {!showNewProfileForm && (
         <div className="grid md:grid-cols-2 gap-6">
-          {profiles.map((profile) => (
+          {profiles.map((profile: any) => (
             <div key={profile.id} className="card">
-              <h3 className="text-xl font-semibold mb-2">{profile.fullName}</h3>
+              <h3 className="text-xl font-semibold mb-2">{profile?.name}</h3>
               <div className="space-y-2 mb-4">
                 <p className="text-gray-600">Age: {profile.age}</p>
                 <p className="text-gray-600">Gender: {profile.gender}</p>
-                <p className="text-gray-600">Emergency Contact: {profile.contactNumber}</p>
+                <p className="text-gray-600">Emergency Contact: {profile.emergencyContactNumber}</p>
                 <p className="text-gray-600">Preferred Language: {profile.preferredLanguage}</p>
               </div>
               <div className="flex justify-end space-x-3">
@@ -243,4 +276,4 @@ export default function Profile() {
       )}
     </div>
   );
-} 
+}
