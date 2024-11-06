@@ -1,9 +1,24 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if user data exists in localStorage to set login state
+    const user = localStorage.getItem('user');
+    setIsLoggedIn(!!user);
+  }, []);
+
+  const handleLogout = () => {
+    // Remove user data from localStorage and update state
+    localStorage.removeItem('user');
+    setIsLoggedIn(false);
+    navigate('/');
+  };
 
   return (
     <nav className="bg-white shadow-lg">
@@ -22,7 +37,11 @@ export default function Navbar() {
             <Link to="/profile" className="text-gray-700 hover:text-primary">Profiles</Link>
             <Link to="/hospitals" className="text-gray-700 hover:text-primary">Hospitals/Organizations</Link>
             <Link to="/bookings" className="text-gray-700 hover:text-primary">Bookings</Link>
-            <Link to="/login" className="btn-primary">Login</Link>
+            {isLoggedIn ? (
+              <button onClick={handleLogout} className="text-gray-700 hover:text-primary">Logout</button>
+            ) : (
+              <Link to="/login" className="btn-primary">Login</Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -46,11 +65,15 @@ export default function Navbar() {
               <Link to="/profile" className="block px-3 py-2 text-gray-700 hover:text-primary">Profiles</Link>
               <Link to="/hospitals" className="block px-3 py-2 text-gray-700 hover:text-primary">Hospitals/Organizations</Link>
               <Link to="/bookings" className="block px-3 py-2 text-gray-700 hover:text-primary">Bookings</Link>
-              <Link to="/login" className="block px-3 py-2 text-gray-700 hover:text-primary">Login</Link>
+              {isLoggedIn ? (
+                <button onClick={handleLogout} className="block px-3 py-2 text-gray-700 hover:text-primary">Logout</button>
+              ) : (
+                <Link to="/login" className="block px-3 py-2 text-gray-700 hover:text-primary">Login</Link>
+              )}
             </div>
           </div>
         )}
       </div>
     </nav>
   );
-} 
+}

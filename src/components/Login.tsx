@@ -26,36 +26,40 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      // Backend integration will go here
-      // Example of how it might work:
-      const response = await fetch('/api/login', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/users/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       });
-
+  
       if (response.ok) {
+        const data = await response.json(); // Assume this contains user details like token or user info
+        
+        // Save user data to localStorage
+        localStorage.setItem('user', JSON.stringify(data));
+  
         setLoginStatus({
           type: 'success',
-          message: 'Login successful! Redirecting...'
+          message: 'Login successful! Redirecting...',
         });
-        // Wait for 1 second to show the success message before redirecting
+        
+        // Redirect after a short delay to allow the success message to display
         setTimeout(() => {
           navigate('/');
         }, 1000);
       } else {
-        const data = await response.json();
+        const errorData = await response.json();
         setLoginStatus({
           type: 'error',
-          message: data.message || 'Invalid email or password'
+          message: errorData.message || 'Invalid email or password',
         });
       }
     } catch (error) {
       setLoginStatus({
         type: 'error',
-        message: 'An error occurred. Please try again.'
+        message: 'An error occurred. Please try again.',
       });
     }
   };

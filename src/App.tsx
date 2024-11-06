@@ -8,6 +8,7 @@ import HospitalList from './pages/HospitalList';
 import HospitalProfile from './pages/HospitalProfile';
 import Booking from './pages/Booking';
 import BookingHistory from './pages/BookingHistory';
+import SignUp from './components/SignUp';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignUp />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/explore" element={<Explore />} />
             <Route path="/hospitals" element={<HospitalProfile />} />

@@ -28,14 +28,39 @@ export default function SignUp() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // Check if passwords match
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords don't match!");
       return;
     }
-    // Backend integration will go here
-    console.log('Signup data:', formData);
-    // After successful signup, redirect to login
-    // navigate('/login');
+  
+    try {
+      // Make a POST request to the backend API
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/users/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 409) {
+          alert("User already exists!");
+        } else {
+          alert(errorData.message || "Signup failed. Please try again.");
+        }
+        return;
+      }
+  
+      // If signup is successful, redirect to the login page
+      alert("You can proceed to login now.");
+      navigate('/login');
+    } catch (error) {
+      console.error("Error during signup:", error);
+      alert(error);
+    }
   };
 
   return (
