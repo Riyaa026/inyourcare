@@ -4,8 +4,6 @@ import Home from './pages/Home';
 import LoginPage from './pages/LoginPage';
 import Profile from './pages/Profile';
 import Explore from './pages/Explore';
-import HospitalList from './pages/HospitalList';
-import HospitalProfile from './pages/HospitalProfile';
 import Booking from './pages/Booking';
 import BookingHistory from './pages/BookingHistory';
 import SignUp from './components/SignUp';
@@ -22,8 +20,6 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/explore" element={<Explore />} />
-            <Route path="/hospitals" element={<HospitalProfile />} />
-            <Route path="/hospital/:id" element={<HospitalList />} />
             <Route path="/booking/:id" element={<Booking />} />
             <Route path="/bookings" element={<BookingHistory />} />
           </Routes>

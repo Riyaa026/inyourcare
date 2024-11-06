@@ -4,6 +4,7 @@ interface PatientProfile {
   id: string;
   fullName: string;
   age: number;
+  gender: string;
   contactNumber: string;
   preferredLanguage: string;
   medicalCondition: string;
@@ -20,6 +21,7 @@ export default function Profile() {
       id: '1',
       fullName: 'John Doe',
       age: 65,
+      gender: 'Male',
       contactNumber: '+91 9876543210',
       preferredLanguage: 'Hindi',
       medicalCondition: 'Diabetes, High Blood Pressure'
@@ -33,6 +35,7 @@ export default function Profile() {
       id: selectedProfile?.id || Date.now().toString(),
       fullName: formData.get('fullName') as string,
       age: parseInt(formData.get('age') as string),
+      gender: formData.get('gender') as string,
       contactNumber: formData.get('contactNumber') as string,
       preferredLanguage: formData.get('preferredLanguage') as string,
       medicalCondition: formData.get('medicalCondition') as string
@@ -94,6 +97,7 @@ export default function Profile() {
               <h3 className="text-xl font-semibold mb-2">{profile.fullName}</h3>
               <div className="space-y-2 mb-4">
                 <p className="text-gray-600">Age: {profile.age}</p>
+                <p className="text-gray-600">Gender: {profile.gender}</p>
                 <p className="text-gray-600">Emergency Contact: {profile.contactNumber}</p>
                 <p className="text-gray-600">Preferred Language: {profile.preferredLanguage}</p>
               </div>
@@ -160,6 +164,21 @@ export default function Profile() {
                   required 
                   readOnly={isViewMode}
                 />
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-2">Gender</label>
+                <select 
+                  name="gender" 
+                  className="input-field"
+                  defaultValue={selectedProfile?.gender}
+                  required
+                  disabled={isViewMode}
+                >
+                  <option value="">Select gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
               <div>
                 <label className="block text-gray-700 mb-2">Emergency Contact Number</label>

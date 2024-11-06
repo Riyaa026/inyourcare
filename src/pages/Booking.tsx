@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 
 export default function Booking() {
-  const { id } = useParams();
+  useParams();
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
