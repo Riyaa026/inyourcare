@@ -32,7 +32,7 @@ export default function Profile() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const profileData = {
-      id: selectedProfile?.id || Date.now().toString(),
+      id: Date.now().toString(),
       name: formData.get('fullName') as string,
       age: parseInt(formData.get('age') as string),
       gender: formData.get('gender') as string,
@@ -43,41 +43,20 @@ export default function Profile() {
     };
 
     try {
-      // Check if updating an existing profile or creating a new one
-      if (selectedProfile) {
-        // Update existing profile
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/patients/update`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(profileData),
-        });
+      // Only create new profile
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/patients/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profileData),
+      });
 
-        if (response.ok) {
-          const updatedProfile = await response.json();
-          setProfiles(profiles.map(profile => 
-            profile.id === selectedProfile.id ? updatedProfile : profile
-          ));
-        } else {
-          console.error('Error updating profile');
-        }
+      if (response.ok) {
+        const newProfile = await response.json();
+        setProfiles([...profiles, newProfile]);
       } else {
-        // Create new profile
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/patients/create`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(profileData),
-        });
-
-        if (response.ok) {
-          const newProfile = await response.json();
-          setProfiles([...profiles, newProfile]);
-        } else {
-          console.error('Error creating profile');
-        }
+        console.error('Error creating profile');
       }
 
       // Close the form after successful submission
@@ -97,12 +76,6 @@ export default function Profile() {
   const handleView = (profile: PatientProfile) => {
     setSelectedProfile(profile);
     setIsViewMode(true);
-    setShowNewProfileForm(true);
-  };
-
-  const handleEdit = (profile: PatientProfile) => {
-    setSelectedProfile(profile);
-    setIsViewMode(false);
     setShowNewProfileForm(true);
   };
 
@@ -134,18 +107,12 @@ export default function Profile() {
                 <p className="text-gray-600">Emergency Contact: {profile.emergencyContactNumber}</p>
                 <p className="text-gray-600">Preferred Language: {profile.preferredLanguage}</p>
               </div>
-              <div className="flex justify-end space-x-3">
+              <div className="flex justify-end">
                 <button 
                   onClick={() => handleView(profile)}
                   className="px-4 py-2 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
                 >
                   View
-                </button>
-                <button 
-                  onClick={() => handleEdit(profile)}
-                  className="btn-primary"
-                >
-                  Edit
                 </button>
               </div>
             </div>
@@ -158,9 +125,7 @@ export default function Profile() {
         <div className="card">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-semibold">
-              {selectedProfile 
-                ? (isViewMode ? 'View Profile' : 'Edit Profile') 
-                : 'Create New Profile'}
+              {selectedProfile ? 'View Profile' : 'Create New Profile'}
             </h2>
             <button 
               className="text-gray-600 hover:text-gray-900"
@@ -253,7 +218,7 @@ export default function Profile() {
               />
             </div>
 
-            {!isViewMode && (
+            {!isViewMode && !selectedProfile && (
               <div className="flex justify-end space-x-4">
                 <button 
                   type="button"
@@ -267,7 +232,7 @@ export default function Profile() {
                   Cancel
                 </button>
                 <button type="submit" className="btn-primary">
-                  {selectedProfile ? 'Save Changes' : 'Create Profile'}
+                  Create Profile
                 </button>
               </div>
             )}
