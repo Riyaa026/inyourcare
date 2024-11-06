@@ -19,6 +19,8 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-4">
             <Link to="/" className="text-gray-700 hover:text-primary">Home</Link>
             <Link to="/explore" className="text-gray-700 hover:text-primary">Explore</Link>
+            <Link to="/profile" className="text-gray-700 hover:text-primary">Profiles</Link>
+            <Link to="/hospitals" className="text-gray-700 hover:text-primary">Hospitals/Organizations</Link>
             <Link to="/bookings" className="text-gray-700 hover:text-primary">Bookings</Link>
             <Link to="/login" className="btn-primary">Login</Link>
           </div>
@@ -41,6 +43,8 @@ export default function Navbar() {
             <div className="px-2 pt-2 pb-3 space-y-1">
               <Link to="/" className="block px-3 py-2 text-gray-700 hover:text-primary">Home</Link>
               <Link to="/explore" className="block px-3 py-2 text-gray-700 hover:text-primary">Explore</Link>
+              <Link to="/profile" className="block px-3 py-2 text-gray-700 hover:text-primary">Profiles</Link>
+              <Link to="/hospitals" className="block px-3 py-2 text-gray-700 hover:text-primary">Hospitals/Organizations</Link>
               <Link to="/bookings" className="block px-3 py-2 text-gray-700 hover:text-primary">Bookings</Link>
               <Link to="/login" className="block px-3 py-2 text-gray-700 hover:text-primary">Login</Link>
             </div>
