@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from "react";
 
 interface PatientProfile {
   id: string;
@@ -8,69 +8,132 @@ interface PatientProfile {
   contactNumber: string;
   preferredLanguage: string;
   medicalCondition: string;
+
+  // Added due to backend response difference (ideally, FE should be maintaining the same structure as backend)
+  name: string;
+  emergencyContactNumber: string;
 }
 
 export default function Profile() {
   const [showNewProfileForm, setShowNewProfileForm] = useState(false);
-  const [selectedProfile, setSelectedProfile] = useState<PatientProfile | null>(null);
+  const [selectedProfile, setSelectedProfile] = useState<PatientProfile | null>(
+    null
+  );
   const [isViewMode, setIsViewMode] = useState(false);
 
   // Example profiles (replace with actual data from backend)
-  const [profiles, setProfiles] = useState<PatientProfile[]>([
-    {
-      id: '1',
-      fullName: 'John Doe',
-      age: 65,
-      gender: 'Male',
-      contactNumber: '+91 9876543210',
-      preferredLanguage: 'Hindi',
-      medicalCondition: 'Diabetes, High Blood Pressure'
+  const [profiles, setProfiles] = useState<PatientProfile[]>([]);
+
+  // Get userId from localStorage
+  const userId = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user") || "{}").id
+    : null;
+
+  // Fetch profiles when the component mounts
+  useEffect(() => {
+    if (userId) {
+      const fetchProfiles = async () => {
+        try {
+          const response = await fetch(
+            `${import.meta.env.VITE_API_URL}/patients/user/${userId}`
+          );
+          if (response.ok) {
+            const data = await response.json();
+            setProfiles(data); // Set the profiles returned by the backend
+          } else {
+            console.error("Failed to fetch profiles");
+          }
+        } catch (error) {
+          console.error("Error fetching profiles:", error);
+        }
+      };
+      fetchProfiles();
     }
-  ]);
+  }, [userId]); // Re-fetch if userId changes
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    console.log("gender: ", formData.get("gender"));
     const profileData = {
       id: Date.now().toString(),
-      name: formData.get('fullName') as string,
-      age: parseInt(formData.get('age') as string),
-      gender: formData.get('gender') as string,
-      emergencyContactNumber: formData.get('contactNumber') as string,
-      preferredLanguage: formData.get('preferredLanguage') as string,
-      medicalCondition: formData.get('medicalCondition') as string,
-      userId: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '{}').id : null
+      name: formData.get("fullName") as string,
+      age: parseInt(formData.get("age") as string),
+      gender: formData.get("gender") as string,
+      emergencyContactNumber: formData.get("contactNumber") as string,
+      preferredLanguage: formData.get("preferredLanguage") as string,
+      medicalCondition: formData.get("medicalCondition") as string,
+      userId: localStorage.getItem("user")
+        ? JSON.parse(localStorage.getItem("user") || "{}").id
+        : null,
     };
 
     try {
-      // Only create new profile
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/patients/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(profileData),
-      });
+      // Check if updating an existing profile or creating a new one
+      if (selectedProfile) {
+        // Update existing profile
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/patients/update`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(profileData),
+          }
+        );
 
-      if (response.ok) {
-        const newProfile = await response.json();
-        setProfiles([...profiles, newProfile]);
+        if (response.ok) {
+          const updatedProfile = await response.json();
+          setProfiles(
+            profiles.map((profile) =>
+              profile.id === selectedProfile.id ? updatedProfile : profile
+            )
+          );
+        } else {
+          console.error("Error updating profile");
+        }
       } else {
-        console.error('Error creating profile');
-      }
+        // Create new profile
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/patients/create`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(profileData),
+          }
+        );
 
-      // Close the form after successful submission
-      setShowNewProfileForm(false);
-      setSelectedProfile(null);
-      setIsViewMode(false);
+        if (response.ok) {
+          const newProfile = await response.json();
+          setProfiles([...profiles, newProfile]);
+        } else {
+          console.error("Error creating profile");
+        }
+
+        // Close the form after successful submission
+        setShowNewProfileForm(false);
+        setSelectedProfile(null);
+        setIsViewMode(false);
+      }
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
     }
   };
 
   const languages = [
-    'English', 'Hindi', 'Bengali', 'Telugu', 'Marathi', 
-    'Tamil', 'Urdu', 'Gujarati', 'Kannada', 'Malayalam'
+    "English",
+    "Hindi",
+    "Bengali",
+    "Telugu",
+    "Marathi",
+    "Tamil",
+    "Urdu",
+    "Gujarati",
+    "Kannada",
+    "Malayalam",
   ].sort();
 
   const handleView = (profile: PatientProfile) => {
@@ -83,7 +146,7 @@ export default function Profile() {
     <div className="max-w-4xl mx-auto space-y-8">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Patient Profiles</h1>
-        <button 
+        <button
           className="btn-primary"
           onClick={() => {
             setSelectedProfile(null);
@@ -103,12 +166,16 @@ export default function Profile() {
               <h3 className="text-xl font-semibold mb-2">{profile?.name}</h3>
               <div className="space-y-2 mb-4">
                 <p className="text-gray-600">Age: {profile.age}</p>
-                <p className="text-gray-600">Gender: {profile.gender}</p>
-                <p className="text-gray-600">Emergency Contact: {profile.emergencyContactNumber}</p>
-                <p className="text-gray-600">Preferred Language: {profile.preferredLanguage}</p>
+                <p className="text-gray-600">Gender: {profile.sex}</p>
+                <p className="text-gray-600">
+                  Emergency Contact: {profile.emergencyContactNumber}
+                </p>
+                <p className="text-gray-600">
+                  Preferred Language: {profile.preferredLanguage}
+                </p>
               </div>
               <div className="flex justify-end">
-                <button 
+                <button
                   onClick={() => handleView(profile)}
                   className="px-4 py-2 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
                 >
@@ -125,9 +192,9 @@ export default function Profile() {
         <div className="card">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-semibold">
-              {selectedProfile ? 'View Profile' : 'Create New Profile'}
+              {selectedProfile ? "View Profile" : "Create New Profile"}
             </h2>
-            <button 
+            <button
               className="text-gray-600 hover:text-gray-900"
               onClick={() => {
                 setShowNewProfileForm(false);
@@ -143,30 +210,30 @@ export default function Profile() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-gray-700 mb-2">Full Name</label>
-                <input 
-                  type="text" 
-                  name="fullName" 
+                <input
+                  type="text"
+                  name="fullName"
                   className="input-field"
-                  defaultValue={selectedProfile?.fullName}
-                  required 
+                  defaultValue={selectedProfile?.name}
+                  required
                   readOnly={isViewMode}
                 />
               </div>
               <div>
                 <label className="block text-gray-700 mb-2">Age</label>
-                <input 
-                  type="number" 
-                  name="age" 
+                <input
+                  type="number"
+                  name="age"
                   className="input-field"
                   defaultValue={selectedProfile?.age}
-                  required 
+                  required
                   readOnly={isViewMode}
                 />
               </div>
               <div>
                 <label className="block text-gray-700 mb-2">Gender</label>
-                <select 
-                  name="gender" 
+                <select
+                  name="gender"
                   className="input-field"
                   defaultValue={selectedProfile?.gender}
                   required
@@ -179,20 +246,24 @@ export default function Profile() {
                 </select>
               </div>
               <div>
-                <label className="block text-gray-700 mb-2">Emergency Contact Number</label>
-                <input 
-                  type="tel" 
-                  name="contactNumber" 
+                <label className="block text-gray-700 mb-2">
+                  Emergency Contact Number
+                </label>
+                <input
+                  type="tel"
+                  name="contactNumber"
                   className="input-field"
-                  defaultValue={selectedProfile?.contactNumber}
-                  required 
+                  defaultValue={selectedProfile?.emergencyContactNumber}
+                  required
                   readOnly={isViewMode}
                 />
               </div>
               <div>
-                <label className="block text-gray-700 mb-2">Preferred Language</label>
-                <select 
-                  name="preferredLanguage" 
+                <label className="block text-gray-700 mb-2">
+                  Preferred Language
+                </label>
+                <select
+                  name="preferredLanguage"
                   className="input-field"
                   defaultValue={selectedProfile?.preferredLanguage}
                   required
@@ -200,27 +271,31 @@ export default function Profile() {
                 >
                   <option value="">Select a language</option>
                   {languages.map((language) => (
-                    <option key={language} value={language}>{language}</option>
+                    <option key={language} value={language}>
+                      {language}
+                    </option>
                   ))}
                 </select>
               </div>
             </div>
 
             <div>
-              <label className="block text-gray-700 mb-2">Medical Conditions</label>
-              <textarea 
-                name="medicalCondition" 
+              <label className="block text-gray-700 mb-2">
+                Medical Conditions
+              </label>
+              <textarea
+                name="medicalCondition"
                 className="input-field h-32"
                 defaultValue={selectedProfile?.medicalCondition}
                 placeholder="Please list any medical conditions, allergies, or special care requirements"
-                required 
+                required
                 readOnly={isViewMode}
               />
             </div>
 
             {!isViewMode && !selectedProfile && (
               <div className="flex justify-end space-x-4">
-                <button 
+                <button
                   type="button"
                   className="btn-primary bg-gray-500 hover:bg-gray-600"
                   onClick={() => {
