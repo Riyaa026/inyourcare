@@ -35,7 +35,8 @@ export default function Navbar() {
             <Link to="/" className="text-gray-700 hover:text-primary">Home</Link>
             <Link to="/explore" className="text-gray-700 hover:text-primary">Explore</Link>
             <Link to="/profile" className="text-gray-700 hover:text-primary">Profiles</Link>
-            <Link to="/bookings" className="text-gray-700 hover:text-primary">Bookings</Link>
+            {/* <Link to="/booking" className="text-gray-700 hover:text-primary">Book Service</Link> */}
+            <Link to="/bookings" className="text-gray-700 hover:text-primary">Booking History</Link>
             {isLoggedIn ? (
               <button onClick={handleLogout} className="text-gray-700 hover:text-primary">Logout</button>
             ) : (
@@ -62,7 +63,8 @@ export default function Navbar() {
               <Link to="/" className="block px-3 py-2 text-gray-700 hover:text-primary">Home</Link>
               <Link to="/explore" className="block px-3 py-2 text-gray-700 hover:text-primary">Explore</Link>
               <Link to="/profile" className="block px-3 py-2 text-gray-700 hover:text-primary">Profiles</Link>
-              <Link to="/bookings" className="block px-3 py-2 text-gray-700 hover:text-primary">Bookings</Link>
+              {/* <Link to="/booking" className="block px-3 py-2 text-gray-700 hover:text-primary">Book Service</Link> */}
+              <Link to="/bookings" className="block px-3 py-2 text-gray-700 hover:text-primary">Booking History</Link>
               {isLoggedIn ? (
                 <button onClick={handleLogout} className="block px-3 py-2 text-gray-700 hover:text-primary">Logout</button>
               ) : (

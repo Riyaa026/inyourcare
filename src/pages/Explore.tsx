@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { StarIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/solid';
 
 interface Profile {
@@ -19,6 +20,7 @@ interface Profile {
 }
 
 export default function Explore() {
+  const navigate = useNavigate();
   const [serviceType, setServiceType] = useState("Nurse");
   const [duration, setDuration] = useState("Hourly");
   const [city, setCity] = useState("");
@@ -87,6 +89,11 @@ export default function Explore() {
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
+  };
+
+  const handleBookNow = (profileName: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/booking/${profileName}`);
   };
 
   return (
@@ -206,7 +213,10 @@ export default function Explore() {
                   </div>
 
                   <div className="flex justify-end pt-4">
-                    <button className="btn-primary">
+                    <button 
+                      className="btn-primary"
+                      onClick={(e) => handleBookNow(profile.name, e)}
+                    >
                       Book Now
                     </button>
                   </div>
