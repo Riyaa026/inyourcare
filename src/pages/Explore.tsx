@@ -25,48 +25,70 @@ export default function Explore() {
   const [duration, setDuration] = useState("Hourly");
   const [city, setCity] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [profiles, setProfiles] = useState([]);
+  
   
   const cities = ['Delhi', 'Chennai', 'Kolkata', 'Mumbai'].sort();
 
   // Example data - replace with actual data from backend
-  const profiles: Profile[] = [
-    {
-      id: '1',
-      name: 'City Hospital',
-      type: 'hospital',
-      location: 'Mumbai, Maharashtra',
-      rating: 4.5,
-      contact: '+91 9876543210',
-      email: 'contact@cityhospital.com',
-      pricing: {
-        hourly: 500,
-        daily: 5000,
-        monthly: 100000
-      },
-      description: 'Leading healthcare provider with specialized elderly care units.',
-      services: ['24/7 Nursing', 'Physiotherapy', 'Emergency Care']
-    },
-    {
-      id: '2',
-      name: 'Care Plus Organization',
-      type: 'organization',
-      location: 'Delhi, NCR',
-      rating: 4.2,
-      contact: '+91 9876543211',
-      email: 'info@careplus.org',
-      pricing: {
-        hourly: 300,
-        daily: 3000,
-        monthly: 80000
-      },
-      description: 'Professional caregiving services for elderly.',
-      services: ['Home Care', 'Assisted Living', 'Medical Assistance']
-    }
-  ];
+  // const profiles: Profile[] = [
+  //   {
+  //     id: '1',
+  //     name: 'City Hospital',
+  //     type: 'hospital',
+  //     location: 'Mumbai, Maharashtra',
+  //     rating: 4.5,
+  //     contact: '+91 9876543210',
+  //     email: 'contact@cityhospital.com',
+  //     pricing: {
+  //       hourly: 500,
+  //       daily: 5000,
+  //       monthly: 100000
+  //     },
+  //     description: 'Leading healthcare provider with specialized elderly care units.',
+  //     services: ['24/7 Nursing', 'Physiotherapy', 'Emergency Care']
+  //   },
+  //   {
+  //     id: '2',
+  //     name: 'Care Plus Organization',
+  //     type: 'organization',
+  //     location: 'Delhi, NCR',
+  //     rating: 4.2,
+  //     contact: '+91 9876543211',
+  //     email: 'info@careplus.org',
+  //     pricing: {
+  //       hourly: 300,
+  //       daily: 3000,
+  //       monthly: 80000
+  //     },
+  //     description: 'Professional caregiving services for elderly.',
+  //     services: ['Home Care', 'Assisted Living', 'Medical Assistance']
+  //   }
+  // ];
 
-  const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
-    // Backend integration will go here
+    try {
+      // Build the API URL with query parameters for city and service type
+      const orgType = serviceType.toLowerCase() == 'nurse' ? 'hospital' : 'organization';
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/organizations?city=${city}&type=${orgType.toLowerCase()}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setProfiles(data); // Update the organizations list
+      } else {
+        console.error("Failed to fetch organizations");
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+    }
   };
 
   const renderRating = (rating: number) => {
@@ -149,11 +171,6 @@ export default function Explore() {
       {/* Results Section */}
       <div className="space-y-4">
         {profiles
-          .filter((profile) => 
-            serviceType === 'Nurse' 
-              ? profile.type === 'hospital' 
-              : profile.type === 'organization'
-          )
           .map((profile) => (
             <div 
               key={profile.id} 
@@ -162,12 +179,12 @@ export default function Explore() {
             >
               <div className="flex justify-between items-start">
                 <div className="space-y-2">
-                  <h3 className="text-xl font-semibold">{profile.name}</h3>
-                  <p className="text-gray-600">{profile.location}</p>
-                  {renderRating(profile.rating)}
+                  <h3 className="text-xl font-semibold">{profile?.name}</h3>
+                  <p className="text-gray-600">{profile?.city}</p>
+                  {renderRating(profile?.rating)}
                 </div>
                 <button className="text-gray-500">
-                  {expandedId === profile.id ? (
+                  {expandedId === profile?.id ? (
                     <ChevronUpIcon className="h-6 w-6" />
                   ) : (
                     <ChevronDownIcon className="h-6 w-6" />
@@ -175,33 +192,33 @@ export default function Explore() {
                 </button>
               </div>
 
-              {expandedId === profile.id && (
+              {expandedId === profile?.id && (
                 <div className="mt-6 pt-4 border-t space-y-4">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <h4 className="font-semibold text-gray-700 mb-2">Contact Information</h4>
-                      <p className="text-gray-600">{profile.contact}</p>
-                      <p className="text-gray-600">{profile.email}</p>
+                      <p className="text-gray-600">+91 9876543211</p>
+                      <p className="text-gray-600">info@careplus.org</p>
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-700 mb-2">Pricing Details</h4>
                       <ul className="text-gray-600 space-y-1">
-                        <li>Hourly Rate: ₹{profile.pricing.hourly}</li>
-                        <li>Daily Rate: ₹{profile.pricing.daily}</li>
-                        <li>Monthly Rate: ₹{profile.pricing.monthly}</li>
+                        <li>Hourly Rate: ₹500</li>
+                        <li>Daily Rate: ₹5000</li>
+                        <li>Monthly Rate: ₹100000</li>
                       </ul>
                     </div>
                   </div>
 
                   <div>
                     <h4 className="font-semibold text-gray-700 mb-2">Description</h4>
-                    <p className="text-gray-600">{profile.description}</p>
+                    <p className="text-gray-600"></p>
                   </div>
 
                   <div>
                     <h4 className="font-semibold text-gray-700 mb-2">Services</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {profile.services.map((service, index) => (
+                    {/* <div className="flex flex-wrap gap-2">
+                      {profile?.services.map((service, index) => (
                         <span
                           key={index}
                           className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
@@ -209,13 +226,13 @@ export default function Explore() {
                           {service}
                         </span>
                       ))}
-                    </div>
+                    </div> */}
                   </div>
 
                   <div className="flex justify-end pt-4">
                     <button 
                       className="btn-primary"
-                      onClick={(e) => handleBookNow(profile.name, e)}
+                      onClick={(e) => handleBookNow(profile?.id, e)}
                     >
                       Book Now
                     </button>

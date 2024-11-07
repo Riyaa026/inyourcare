@@ -6,6 +6,7 @@ interface Profile {
   name: string;
   age: number;
   gender: string;
+  sex: string;
 }
 
 interface ServiceProvider {
@@ -21,11 +22,11 @@ interface ServiceProvider {
 }
 
 export default function Booking() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const { id: organizationId } = useParams();  // Extract organizationId from the URL
+  const navigate = useNavigate();'+91 9876543211'
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string>('');
-  const [provider, setProvider] = useState<ServiceProvider | null>(null);
+  // const [provider, setProvider] = useState<ServiceProvider | null>(null);
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
   const [duration, setDuration] = useState<'daily' | 'weekly' | 'monthly'>('daily');
@@ -34,25 +35,25 @@ export default function Booking() {
 
   useEffect(() => {
     // Fetch provider details when component mounts
-    const fetchProvider = async () => {
-      if (id) {
-        try {
-          const response = await fetch(`${import.meta.env.VITE_API_URL}/providers/${id}`);
-          if (response.ok) {
-            const data = await response.json();
-            setProvider(data);
-          }
-        } catch (error) {
-          console.error('Error fetching provider:', error);
-        }
-      }
-    };
+    // const fetchProvider = async () => {
+    //   if (id) {
+    //     try {
+    //       const response = await fetch(`${import.meta.env.VITE_API_URL}/providers/${id}`);
+    //       if (response.ok) {
+    //         const data = await response.json();
+    //         setProvider(data);
+    //       }
+    //     } catch (error) {
+    //       console.error('Error fetching provider:', error);
+    //     }
+    //   }
+    // };
 
     // Fetch profiles
     const fetchProfiles = async () => {
       try {
         const userId = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '{}').id : null;
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/patients/${userId}`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/patients/user/${userId}`);
         if (response.ok) {
           const data = await response.json();
           setProfiles(data);
@@ -62,30 +63,32 @@ export default function Booking() {
       }
     };
 
-    fetchProvider();
+    // fetchProvider();
     fetchProfiles();
     setBookingId(`BK${Date.now().toString().slice(-6)}`);
-  }, [id]);
+  }, []);
 
   // Calculate total amount when dates or duration changes
   useEffect(() => {
-    if (provider && startDate && endDate) {
+    if (startDate && endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
       const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
       
       let amount = 0;
       if (duration === 'daily') {
-        amount = days * provider.pricing.daily;
+        amount = days * 1000;
       } else if (duration === 'weekly') {
-        amount = Math.ceil(days / 7) * (provider.pricing.daily * 6); // Weekly discount
+        amount = Math.ceil(days / 7) * (1000 * 10); // Weekly discount
       } else {
-        amount = Math.ceil(days / 30) * (provider.pricing.daily * 25); // Monthly discount
+        amount = Math.ceil(days / 30) * (1000 * 25); // Monthly discount
       }
       
       setTotalAmount(amount);
     }
-  }, [provider, startDate, endDate, duration]);
+  }, [startDate, endDate, duration]);
+
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,11 +98,10 @@ export default function Booking() {
       return;
     }
 
+    console.log("payload: ", selectedProfile, duration)
+    
     const bookingData = {
-      bookingId,
-      providerId: id,
-      providerName: provider?.name,
-      providerType: provider?.type,
+      organizationId: organizationId,
       patientId: selectedProfile,
       startDate,
       endDate,
@@ -136,8 +138,8 @@ export default function Booking() {
       <div className="card bg-gray-50">
         <div className="space-y-4">
           <div className="flex justify-between items-start">
-            <div>
-              {provider && (
+            {/* <div>
+              {(
                 <div className="space-y-2">
                   <h2 className="text-2xl font-semibold text-primary">{provider.name}</h2>
                   <div className="text-gray-600">
@@ -146,14 +148,14 @@ export default function Booking() {
                   </div>
                 </div>
               )}
-            </div>
+            </div> */}
             <div className="text-right">
               <p className="text-sm text-gray-600">Booking ID:</p>
               <p className="font-medium">{bookingId}</p>
             </div>
           </div>
           
-          {provider && (
+          {/* {provider && (
             <div className="border-t pt-4">
               <h3 className="font-medium mb-2">Pricing Information</h3>
               <div className="grid grid-cols-3 gap-4 text-sm">
@@ -171,7 +173,7 @@ export default function Booking() {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
         </div>
       </div>
 
@@ -190,7 +192,7 @@ export default function Booking() {
               <option value="">Choose a profile</option>
               {profiles.map((profile) => (
                 <option key={profile.id} value={profile.id}>
-                  {profile.name} - {profile.age} years, {profile.gender}
+                  {profile?.name} - {profile?.sex}
                 </option>
               ))}
             </select>
